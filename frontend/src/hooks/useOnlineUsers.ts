@@ -66,7 +66,7 @@ export function useOnlineUsers() {
                 );
 
                 if (userMessage) {
-                  lastMessageTime = parseInt(userMessage.parsedJson?.timestamp || '0');
+                  lastMessageTime = parseInt((userMessage.parsedJson as any)?.timestamp || '0');
                 }
               } catch (error) {
                 console.error('Failed to fetch user messages:', error);
