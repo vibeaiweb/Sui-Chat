@@ -7,6 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_WALRUS_AGGREGATOR: string
   readonly VITE_WALRUS_PUBLISHER: string
   readonly VITE_ENABLE_WALRUS: string
+  readonly VITE_WS_SERVER_URL: string
 }
 
 interface ImportMeta {

@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Flex, TextArea, Button, Text } from '@radix-ui/themes';
 import { PaperPlaneIcon } from '@radix-ui/react-icons';
 
 interface MessageInputProps {
   onSend: (content: string) => Promise<void>;
+  onTyping?: (isTyping: boolean) => void;
   disabled?: boolean;
 }
 
-export default function MessageInput({ onSend, disabled = false }: MessageInputProps) {
+export default function MessageInput({ onSend, onTyping, disabled = false }: MessageInputProps) {
   const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
   const maxLength = 1000;
   const remainingChars = maxLength - message.length;
@@ -20,12 +22,31 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
 
     try {
       setIsSending(true);
+
+      // 停止打字指示器
+      if (onTyping) {
+        onTyping(false);
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+      }
+
       await onSend(trimmedMessage);
       setMessage('');
     } catch (error) {
       console.error('Failed to send message:', error);
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setMessage(newValue);
+
+    // 发送打字指示器
+    if (onTyping && newValue.trim()) {
+      onTyping(true);
     }
   };
 
@@ -40,7 +61,7 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
     <Flex direction="column" gap="2">
       <TextArea
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKeyPress}
         placeholder="輸入訊息... (Enter 發送, Shift+Enter 換行)"
         disabled={disabled || isSending}
