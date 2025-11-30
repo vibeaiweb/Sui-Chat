@@ -223,26 +223,32 @@ export function useChat(roomId: string = CHAT_ROOM_ID) {
   };
 
   // Send typing indicator
+  // ⚠️ DISABLED: Typing indicators require on-chain transactions
+  // This causes wallet popup every time user types, which is too intrusive
+  // TODO: Consider implementing this as an off-chain feature or with sponsored transactions
   const sendTypingIndicator = async () => {
     if (!currentAccount?.address) return;
 
-    try {
-      const tx = new Transaction();
+    // Disabled to prevent frequent wallet popups
+    console.log('Typing indicator disabled to improve UX');
+    return;
 
-      tx.moveCall({
-        target: `${PACKAGE_ID}::chat_room::emit_typing`,
-        arguments: [
-          tx.object(roomId),
-          tx.object(CLOCK_OBJECT_ID),
-        ],
-      });
-
-      await signAndExecuteTransaction({
-        transaction: tx,
-      });
-    } catch (error) {
-      console.error('Failed to send typing indicator:', error);
-    }
+    // Original implementation (disabled):
+    // try {
+    //   const tx = new Transaction();
+    //   tx.moveCall({
+    //     target: `${PACKAGE_ID}::chat_room::emit_typing`,
+    //     arguments: [
+    //       tx.object(roomId),
+    //       tx.object(CLOCK_OBJECT_ID),
+    //     ],
+    //   });
+    //   await signAndExecuteTransaction({
+    //     transaction: tx,
+    //   });
+    // } catch (error) {
+    //   console.error('Failed to send typing indicator:', error);
+    // }
   };
 
   // Subscribe to new messages via events

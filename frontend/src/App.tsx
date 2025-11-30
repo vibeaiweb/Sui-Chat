@@ -34,19 +34,21 @@ function App() {
   }, [currentAccount, hasProfile]);
 
   // Update last_seen periodically while user is active
-  useEffect(() => {
-    if (currentAccount && hasProfile && profile) {
-      // Update immediately when profile loads
-      updateLastSeen();
-
-      // Then update every 2 minutes
-      const interval = setInterval(() => {
-        updateLastSeen();
-      }, 2 * 60 * 1000); // 2 minutes
-
-      return () => clearInterval(interval);
-    }
-  }, [currentAccount, hasProfile, profile]);
+  // ⚠️ DISABLED: Automatic updates cause frequent wallet popups
+  // Last seen is now only updated when user sends a message (see handleSendMessage)
+  // useEffect(() => {
+  //   if (currentAccount && hasProfile && profile) {
+  //     // Update immediately when profile loads
+  //     updateLastSeen();
+  //
+  //     // Then update every 2 minutes
+  //     const interval = setInterval(() => {
+  //       updateLastSeen();
+  //     }, 2 * 60 * 1000); // 2 minutes
+  //
+  //     return () => clearInterval(interval);
+  //   }
+  // }, [currentAccount, hasProfile, profile]);
 
   // Handle avatar file selection for create
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
