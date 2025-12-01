@@ -42,14 +42,18 @@ export function useProfile() {
           let avatarUrl = '';
           const avatarBlobId = fields.avatar_walrus_blob_id;
 
-          // Only use if blob ID is valid (not empty, not a placeholder)
+          // Only use if blob ID is valid (not empty, not a placeholder) and aggregator is configured
           const isValidBlobId = avatarBlobId &&
                                 avatarBlobId.trim() !== '' &&
-                                !avatarBlobId.startsWith('default_');
+                                !avatarBlobId.startsWith('default_') &&
+                                WALRUS_AGGREGATOR;
 
           if (isValidBlobId) {
             // For images, use the Walrus URL directly instead of downloading
             avatarUrl = `${WALRUS_AGGREGATOR}/v1/blobs/${avatarBlobId}`;
+            console.log('Profile avatar URL:', avatarUrl);
+          } else {
+            console.log('No valid avatar blob ID or aggregator not configured');
           }
 
           const userProfile: UserProfile = {

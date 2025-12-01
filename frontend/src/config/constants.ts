@@ -1,8 +1,19 @@
 // Load from environment variables
 export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID;
 export const CHAT_ROOM_ID = import.meta.env.VITE_CHAT_ROOM_ID;
-export const WALRUS_PUBLISHER = import.meta.env.VITE_WALRUS_PUBLISHER;
-export const WALRUS_AGGREGATOR = import.meta.env.VITE_WALRUS_AGGREGATOR;
+export const WALRUS_PUBLISHER = import.meta.env.VITE_WALRUS_PUBLISHER || 'https://publisher.walrus-testnet.walrus.space';
+export const WALRUS_AGGREGATOR = import.meta.env.VITE_WALRUS_AGGREGATOR || 'https://aggregator.walrus-testnet.walrus.space';
+
+// Debug logging for environment variables (only in development)
+if (import.meta.env.DEV) {
+  console.log('Environment variables loaded:', {
+    PACKAGE_ID,
+    CHAT_ROOM_ID,
+    WALRUS_PUBLISHER,
+    WALRUS_AGGREGATOR,
+    ENABLE_WALRUS: import.meta.env.VITE_ENABLE_WALRUS
+  });
+}
 
 // Walrus configuration - default is disabled (false)
 export const ENABLE_WALRUS = import.meta.env.VITE_ENABLE_WALRUS === 'true' || false;

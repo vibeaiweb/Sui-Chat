@@ -91,9 +91,12 @@ export function useChat(roomId: string = CHAT_ROOM_ID) {
                   const avatarBlobId = profileFields.avatar_walrus_blob_id;
                   console.log('Avatar blob ID:', avatarBlobId);
 
-                  if (avatarBlobId && avatarBlobId.trim() !== '' && !avatarBlobId.startsWith('default_')) {
+                  // Only construct Walrus URL if we have valid blob ID and aggregator URL
+                  if (avatarBlobId && avatarBlobId.trim() !== '' && !avatarBlobId.startsWith('default_') && WALRUS_AGGREGATOR) {
                     senderAvatar = `${WALRUS_AGGREGATOR}/v1/blobs/${avatarBlobId}`;
                     console.log('Sender avatar URL:', senderAvatar);
+                  } else {
+                    console.log('Using default avatar (blob ID invalid or aggregator not configured)');
                   }
 
                   console.log('Sender profile:', { senderName, senderAvatar });
