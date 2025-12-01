@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Box, Flex, Heading, Text, Avatar, ScrollArea, Separator } from '@radix-ui/themes';
 import { useOnlineUsers } from '../hooks/useOnlineUsers';
 import { BOTS } from '../config/bots';
@@ -129,70 +130,15 @@ export default function UserList() {
                   暫無用戶
                 </Text>
               ) : (
-                users.map((user) => {
-              const online = isUserOnline(user.last_seen);
-              const avatarSrc = user.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.wallet_address}`;
-
-              return (
-                <Flex
-                  key={user.id}
-                  align="center"
-                  gap="3"
-                  p="2"
-                  style={{
-                    borderRadius: 'var(--radius-3)',
-                    transition: 'background 0.2s',
-                    cursor: 'pointer',
-                  }}
-                  className="user-item"
-                >
-                  {/* Avatar with online indicator */}
-                  <Box style={{ position: 'relative' }}>
-                    <Avatar
-                      src={avatarSrc}
-                      fallback={user.username.charAt(0).toUpperCase()}
-                      size="3"
-                      radius="full"
-                    />
-                    {/* Online indicator */}
-                    <Box
-                      style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        right: 0,
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '50%',
-                        background: online ? 'var(--green-9)' : 'var(--gray-6)',
-                        border: '2px solid var(--gray-1)',
-                      }}
-                    />
-                  </Box>
-
-                  {/* User info */}
-                  <Flex direction="column" style={{ flex: 1, minWidth: 0 }}>
-                    <Text size="2" weight="medium" truncate>
-                      {user.username}
-                    </Text>
-                    <Flex direction="column" gap="0">
-                      <Text size="1" color={online ? 'green' : 'gray'} truncate>
-                        {online ? '🟢 線上' : '⚫ 離線'}
-                      </Text>
-                      {user.lastMessageTime ? (
-                        <Text size="1" color="gray" truncate>
-                          發文: {formatTime(user.lastMessageTime)}
-                        </Text>
-                      ) : (
-                        <Text size="1" color="gray" truncate>
-                          尚未發文
-                        </Text>
-                      )}
-                    </Flex>
-                  </Flex>
-                </Flex>
-              );
-            })
-          )}
+                users.map((user) => (
+                  <UserListItem
+                    key={user.id}
+                    user={user}
+                    isOnline={isUserOnline(user.last_seen)}
+                    formatTime={formatTime}
+                  />
+                ))
+              )}
             </Flex>
           </Box>
         </Flex>
@@ -203,6 +149,85 @@ export default function UserList() {
           background: var(--gray-3);
         }
       `}</style>
+    </Flex>
+  );
+}
+
+// Separate component for user list item to properly use useState
+function UserListItem({ user, isOnline, formatTime }: {
+  user: any;
+  isOnline: boolean;
+  formatTime: (timestamp: number) => string;
+}) {
+  const [avatarError, setAvatarError] = useState(false);
+
+  // Use Walrus avatar if available and not errored, otherwise use DiceBear
+  const avatarSrc = (user.avatar_url && !avatarError)
+    ? user.avatar_url
+    : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.wallet_address}`;
+
+  return (
+    <Flex
+      align="center"
+      gap="3"
+      p="2"
+      style={{
+        borderRadius: 'var(--radius-3)',
+        transition: 'background 0.2s',
+        cursor: 'pointer',
+      }}
+      className="user-item"
+    >
+      {/* Avatar with online indicator */}
+      <Box style={{ position: 'relative' }}>
+        <Avatar
+          src={avatarSrc}
+          fallback={user.username.charAt(0).toUpperCase()}
+          size="3"
+          radius="full"
+          onError={() => {
+            // If Walrus image fails, fall back to DiceBear
+            if (user.avatar_url && !avatarError) {
+              console.log('Walrus avatar failed for user, using DiceBear:', user.username);
+              setAvatarError(true);
+            }
+          }}
+        />
+        {/* Online indicator */}
+        <Box
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            width: '12px',
+            height: '12px',
+            borderRadius: '50%',
+            background: isOnline ? 'var(--green-9)' : 'var(--gray-6)',
+            border: '2px solid var(--gray-1)',
+          }}
+        />
+      </Box>
+
+      {/* User info */}
+      <Flex direction="column" style={{ flex: 1, minWidth: 0 }}>
+        <Text size="2" weight="medium" truncate>
+          {user.username}
+        </Text>
+        <Flex direction="column" gap="0">
+          <Text size="1" color={isOnline ? 'green' : 'gray'} truncate>
+            {isOnline ? '🟢 線上' : '⚫ 離線'}
+          </Text>
+          {user.lastMessageTime ? (
+            <Text size="1" color="gray" truncate>
+              發文: {formatTime(user.lastMessageTime)}
+            </Text>
+          ) : (
+            <Text size="1" color="gray" truncate>
+              尚未發文
+            </Text>
+          )}
+        </Flex>
+      </Flex>
     </Flex>
   );
 }

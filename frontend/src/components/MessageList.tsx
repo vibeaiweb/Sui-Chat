@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Box, Flex, Text, Avatar, Spinner } from '@radix-ui/themes';
 import { Message } from '../types';
 import { formatTime, truncateAddress } from '../utils/format';
@@ -42,8 +43,13 @@ export default function MessageList({ messages, isLoading = false }: MessageList
 }
 
 function MessageItem({ message }: { message: Message }) {
-  const avatarUrl =
-    message.senderAvatar || getDefaultAvatarUrl(message.sender);
+  const [avatarError, setAvatarError] = useState(false);
+
+  // Use Walrus avatar if available and not errored, otherwise use DiceBear default
+  const avatarUrl = (message.senderAvatar && !avatarError)
+    ? message.senderAvatar
+    : getDefaultAvatarUrl(message.sender);
+
   const displayName = message.senderName || truncateAddress(message.sender);
 
   return (
@@ -53,6 +59,13 @@ function MessageItem({ message }: { message: Message }) {
         fallback={displayName[0]}
         size="3"
         radius="full"
+        onError={() => {
+          // If Walrus image fails to load (404, CORS, etc.), fall back to DiceBear
+          if (message.senderAvatar && !avatarError) {
+            console.log('Walrus avatar failed to load, falling back to DiceBear:', message.senderAvatar);
+            setAvatarError(true);
+          }
+        }}
       />
       <Flex direction="column" gap="1" style={{ flex: 1 }}>
         <Flex align="center" gap="2">
